@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,6 +94,35 @@ public class VehicleRepositoryTest {
                 .isEqualTo(1);
         assertThat(vehicles.get(0).getRegistrationNumber())
                 .isEqualTo(vehicleBo2.getRegistrationNumber());
+    }
+
+    @Test
+    public void givenSomeDriversWithVehicles_whenFetchVehicles_thenReturnAllVehicles() {
+        // given drivers with vehicles
+        Driver driverBo1 = new Driver("D1");
+        Vehicle vehicleBo1 = new Vehicle("V1");
+        Vehicle vehicleBo11 = new Vehicle("V11");
+
+        driverBo1.addVehicle(vehicleBo1);
+        driverBo1.addVehicle(vehicleBo11);
+
+        // given driver without vehicle
+        Driver driverBo2 = new Driver("D2");
+
+        entityManager.persist(driverBo1);
+        entityManager.persist(driverBo2);
+        entityManager.flush();
+
+        // when fetch all vehicles
+        List<Vehicle> vehicles = vehicleRepository.findAll();
+
+        // then return all vehicles
+        assertThat(vehicles.size())
+                .isEqualTo(2);
+        assertThat(vehicles.get(0).getRegistrationNumber())
+                .isEqualTo(vehicleBo11.getRegistrationNumber());
+        assertThat(vehicles.get(1).getRegistrationNumber())
+                .isEqualTo(vehicleBo1.getRegistrationNumber());
     }
 
 }
